@@ -11,53 +11,32 @@ namespace SelfOrganizingMap
     {
         static void Main(string[] args)
         {
-            double[][] Inputs = new double[6][];
+            Random r = new Random();
 
-            Inputs[0] = new double[3];
-            Inputs[1] = new double[3];
-            Inputs[2] = new double[3];
-            Inputs[3] = new double[3];
-            Inputs[4] = new double[3];
-            Inputs[5] = new double[3];
+            AdachSOM som = new AdachSOM(2, null);
 
-            Inputs[0][0] = 0;
-            Inputs[0][1] = 0;
-            Inputs[0][2] = 0.1;
+            List<string> lab = new List<string>();
+            List<double[]> dat = new List<double[]>();
 
-            Inputs[1][0] = 0.58;
-            Inputs[1][1] = 0.5;
-            Inputs[1][2] = 0.48;
+            for (int i = 0; i < 25; i++)
+            {
+                lab.Add("test" + i.ToString());
+                dat.Add(new double[] { r.NextDouble(),r.NextDouble() });
+                som.Add(lab.Last(), dat.Last());
+            }
 
-            Inputs[2][0] = 1;
-            Inputs[2][1] = 1;
-            Inputs[2][2] = 0.9;
-
-            Inputs[3][0] = 0.92;
-            Inputs[3][1] = 0.75;
-            Inputs[3][2] = 0.86;
-
-            Inputs[4][0] = 0.87;
-            Inputs[4][1] = 0.95;
-            Inputs[4][2] = 0.71;
-
-            Inputs[5][0] = 0.5;
-            Inputs[5][1] = 0.4;
-            Inputs[5][2] = 0.55;
-
-
-            AdachSOM som = new AdachSOM(Inputs, 7, null);
             som.StartFitting();
-            Thread.Sleep(7800);
+            Thread.Sleep(2000);
             som.StopFitting();
             Thread.Sleep(100);
             Console.WriteLine("\n");
-            foreach (double[] input in Inputs)
+            for (int i = 0; i < lab.Count; i++)
             {
-                Console.ForegroundColor = (ConsoleColor)1 + som.GetGroup(input);
-
-                foreach (double d in input)
+                Console.ForegroundColor = (ConsoleColor)1 + som.GetGroup(dat[i]);
+                Console.Write("Group: " + som.GetGroup(dat[i]) + "");
+                foreach (double d in dat[i])
                     Console.Write(" |" + d + "| ");
-                Console.WriteLine();
+                Console.WriteLine("\n");
             }
             Console.ReadKey();
         }
@@ -68,11 +47,201 @@ namespace SelfOrganizingMap
         bool isStarted = false;
         public delegate void DiagnosticDatas(string diagString);
         private event DiagnosticDatas DiagnosticInfo;
+        List<double[]> Datas;
+        List<string> Labels;
+        List<double[]> Neurons;
+        double[] DistanceMatrix;
+        int howManyGroups = 0;
+
+        public void Add(string _label, double[] _data)
+        {
+            Labels.Add(_label);
+            Datas.Add(_data);
+        }
+
+        private void Init()
+        {
+
+            Random r = new Random();
+
+
+            for (int i = 0; i < howManyGroups; i++)
+            {
+                Neurons.Add(new double[Datas[0].Length]);
+                for (int j = 0; j < Datas[0].Length; j++)
+                    Neurons[i][j] = r.NextDouble();
+            }
+        }
+        public AdachSOM(int _howManyGroups, DiagnosticDatas _diagnosticDatas = null)
+        {
+            if (_diagnosticDatas != null)
+                DiagnosticInfo = _diagnosticDatas;
+            else
+                DiagnosticInfo = Console.Write;
+
+            Labels = new List<string>();
+            Datas = Datas = new List<double[]>();
+            Neurons = Neurons = new List<double[]>();
+
+            howManyGroups = _howManyGroups;
+
+            DistanceMatrix = new double[_howManyGroups];
+        }
+
+        public int GetGroup(double[] _data)
+        {
+            int group = 0;
+            double distance = CalculateDistance(_data, Neurons[0]);
+
+            for (int i = 0; i < Neurons.Count; i++)
+                if (CalculateDistance(_data, Neurons[i]) < distance)
+                {
+                    distance = CalculateDistance(_data, Neurons[i]);
+                    group = i;
+                }
+
+            return group;
+        }
+        public double GetDistance(double[] data)
+        {
+            int group = 0;
+            double distance = CalculateDistance(data, Neurons[0]);
+
+            for (int i = 0; i < Neurons.Count; i++)
+                if (CalculateDistance(data, Neurons[i]) < distance)
+                {
+                    distance = CalculateDistance(data, Neurons[i]);
+                    group = i;
+                }
+
+            return distance;
+        }
+
+        public void StartFitting()
+        {
+            if (isStarted == false)
+            {
+                isStarted = true;
+                Init();
+                new Task(() =>
+                {
+                    while (isStarted)
+                    {
+                        DiagnosticInfo("Total distance: " + Math.Round(FitNetworkWinner(Datas, Neurons, DistanceMatrix), 4) + "      | ");
+                        // DiagnosticInfo("Total distance: " + Math.Round(FitNetworkGauss(Datas, Neurons, DistanceMatrix), 4) + "      | ");
+
+                        // Print(Neurons);
+                    }
+                }).Start();
+            }
+        }
+        public void StopFitting()
+        {
+            isStarted = false;
+        }
+
+        private double FitNetworkWinner(List<double[]> Inputs, List<double[]> Neurons, double[] DistanceMatrix)
+        {
+            double totalDistance = 0;
+            List<int> AliveNeurons = new List<int>();
+            for (int i = 0; i < Inputs.Count; i++)
+            {
+                for (int j = 0; j < Neurons.Count; j++)
+                    DistanceMatrix[j] = CalculateDistance(Inputs[i], Neurons[j]);
+
+                int winner = FindShortestDistance(DistanceMatrix);
+                AliveNeurons.Add(winner);
+                totalDistance += DistanceMatrix[winner];
+                FitNeuron(Inputs[i], Neurons[winner]);
+            }
+
+            for (int i = 0; i < Neurons.Count; i++)
+                if (!AliveNeurons.Contains(i))
+                    for (int j = 0; j < Neurons[i].Length; j++)
+                        Neurons[i][j] = 0;
+
+            totalDistance /= Inputs.Count;
+            return totalDistance;
+        }
+        private double FitNetworkGauss(double[][] Inputs, double[][] Neurons, double[] DistanceMatrix)
+        {
+            double totalDistance = 0;
+            for (int i = 0; i < Inputs.Length; i++)
+            {
+                for (int j = 0; j < DistanceMatrix.Length; j++)
+                {
+                    DistanceMatrix[j] = CalculateDistance(Inputs[i], Neurons[j]);
+                    int winner = FindShortestDistance(DistanceMatrix);
+                    totalDistance += DistanceMatrix[winner];
+                    FitNeuron(Inputs[i], Neurons[j], CalculateDistance(Inputs[i], Neurons[j]), winner);
+                }
+            }
+            totalDistance /= Inputs.Length;
+            return totalDistance;
+        }
+
+
+        private int FindShortestDistance(double[] distanceMatrix)
+        {
+            int winner = 0;
+            double distance = 100;
+
+            for (int i = 0; i < distanceMatrix.Length; i++)
+                if (distanceMatrix[i] <= distance)
+                {
+                    distance = distanceMatrix[i];
+                    winner = i;
+                }
+            return winner;
+        }
+
+        private void FitNeuron(double[] Inputs, double[] Neurons)
+        {
+            for (int i = 0; i < Inputs.Length; i++)
+                Neurons[i] -= 0.1 * (Neurons[i] - Inputs[i]);
+        }
+        private void FitNeuron(double[] Inputs, double[] Neurons, double distance, double winner)
+        {
+            //   if (distance <0.5)
+            for (int i = 0; i < Inputs.Length; i++)
+                Neurons[i] -= distance * (0.1 * (Neurons[i] - Inputs[i]));
+        }
+
+        private double CalculateDistance(double[] Input, double[] Neuron)
+        {
+            if (Input.Length == Neuron.Length)
+            {
+                double DifferencBetweenDimensions = 0;
+                for (int i = 0; i < Input.Length; i++)
+                    DifferencBetweenDimensions += Math.Pow(Input[i] - Neuron[i], 2);
+
+                return Math.Sqrt(DifferencBetweenDimensions);
+            }
+            else
+                throw new Exception("Calculate distance error");
+        }
+
+        private void Print(double[][] Neurons)
+        {
+            for (int i = 0; i < Neurons.Length; i++)
+                for (int j = 0; j < Neurons[i].Length; j++)
+                    DiagnosticInfo(Math.Round(Neurons[i][j], 4) + " | ");
+
+            DiagnosticInfo("\n");
+        }
+    }
+
+    public class AdachSOMList
+    {
+        bool isStarted = false;
+        public delegate void DiagnosticDatas(string diagString);
+        private event DiagnosticDatas DiagnosticInfo;
         double[][] Datas;
         double[][] Neurons;
         double[] DistanceMatrix;
 
-        public AdachSOM(double[][] _datas, int _neuronsCount, DiagnosticDatas _diagnosticDatas = null)
+
+        public AdachSOMList(double[][] _datas, int _howManyGroups, DiagnosticDatas _diagnosticDatas = null)
         {
             if (_diagnosticDatas != null)
                 DiagnosticInfo = _diagnosticDatas;
@@ -81,7 +250,7 @@ namespace SelfOrganizingMap
 
             Random r = new Random();
             Datas = _datas;
-            Neurons = new double[_neuronsCount][];
+            Neurons = new double[_howManyGroups][];
             DistanceMatrix = new double[Neurons.Length];
 
 
@@ -132,35 +301,43 @@ namespace SelfOrganizingMap
                 {
                     while (isStarted)
                     {
-                        DiagnosticInfo("Total distance: " + Math.Round(FitNetworkBest(Datas, Neurons, DistanceMatrix), 4) + "      | ");
-                        // DiagnosticInfo("Total distance: " + Math.Round(FitNetwork(Datas, Neurons, DistanceMatrix), 4) + "      | ");
+                        DiagnosticInfo("Total distance: " + Math.Round(FitNetworkWinner(Datas, Neurons, DistanceMatrix), 4) + "      | ");
+                        // DiagnosticInfo("Total distance: " + Math.Round(FitNetworkGauss(Datas, Neurons, DistanceMatrix), 4) + "      | ");
 
                         Print(Neurons);
                     }
                 }).Start();
             }
         }
-
         public void StopFitting()
         {
             isStarted = false;
         }
 
-        private double FitNetworkBest(double[][] Inputs, double[][] Neurons, double[] DistanceMatrix)
+        private double FitNetworkWinner(double[][] Inputs, double[][] Neurons, double[] DistanceMatrix)
         {
             double totalDistance = 0;
+            List<int> AliveNeurons = new List<int>();
             for (int i = 0; i < Inputs.Length; i++)
             {
-                for (int j = 0; j < DistanceMatrix.Length; j++)
+                for (int j = 0; j < Neurons.Length; j++)
                     DistanceMatrix[j] = CalculateDistance(Inputs[i], Neurons[j]);
-                int winner = FindSmallestDistance(DistanceMatrix);
+
+                int winner = FindShortestDistance(DistanceMatrix);
+                AliveNeurons.Add(winner);
                 totalDistance += DistanceMatrix[winner];
                 FitNeuron(Inputs[i], Neurons[winner]);
             }
+
+            for (int i = 0; i < Neurons.Length; i++)
+                if (!AliveNeurons.Contains(i))
+                    for (int j = 0; j < Neurons[i].Length; j++)
+                        Neurons[i][j] = 0;
+
             totalDistance /= Inputs.Length;
             return totalDistance;
         }
-        private double FitNetwork(double[][] Inputs, double[][] Neurons, double[] DistanceMatrix)
+        private double FitNetworkGauss(double[][] Inputs, double[][] Neurons, double[] DistanceMatrix)
         {
             double totalDistance = 0;
             for (int i = 0; i < Inputs.Length; i++)
@@ -168,7 +345,7 @@ namespace SelfOrganizingMap
                 for (int j = 0; j < DistanceMatrix.Length; j++)
                 {
                     DistanceMatrix[j] = CalculateDistance(Inputs[i], Neurons[j]);
-                    int winner = FindSmallestDistance(DistanceMatrix);
+                    int winner = FindShortestDistance(DistanceMatrix);
                     totalDistance += DistanceMatrix[winner];
                     FitNeuron(Inputs[i], Neurons[j], CalculateDistance(Inputs[i], Neurons[j]), winner);
                 }
@@ -178,13 +355,13 @@ namespace SelfOrganizingMap
         }
 
 
-        private int FindSmallestDistance(double[] distanceMatrix)
+        private int FindShortestDistance(double[] distanceMatrix)
         {
             int winner = 0;
-            double distance = distanceMatrix[0];
+            double distance = 100;
 
             for (int i = 0; i < distanceMatrix.Length; i++)
-                if (distanceMatrix[i] < distance)
+                if (distanceMatrix[i] <= distance)
                 {
                     distance = distanceMatrix[i];
                     winner = i;
@@ -195,13 +372,13 @@ namespace SelfOrganizingMap
         private void FitNeuron(double[] Inputs, double[] Neurons)
         {
             for (int i = 0; i < Inputs.Length; i++)
-                Neurons[i] -= 0.01 * (Neurons[i] - Inputs[i]);
+                Neurons[i] -= 0.1 * (Neurons[i] - Inputs[i]);
         }
         private void FitNeuron(double[] Inputs, double[] Neurons, double distance, double winner)
         {
-            if (distance < winner * 3)
-                for (int i = 0; i < Inputs.Length; i++)
-                    Neurons[i] -= (distance * 0.1) * (Neurons[i] - Inputs[i]);
+            //   if (distance <0.5)
+            for (int i = 0; i < Inputs.Length; i++)
+                Neurons[i] -= distance * (0.1 * (Neurons[i] - Inputs[i]));
         }
 
         private double CalculateDistance(double[] Input, double[] Neuron)
@@ -227,4 +404,6 @@ namespace SelfOrganizingMap
             DiagnosticInfo("\n");
         }
     }
+
+
 }
