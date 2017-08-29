@@ -10,7 +10,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace SelfOrganizingMapWpfApp
 {
@@ -55,7 +58,7 @@ namespace SelfOrganizingMapWpfApp
 
         #endregion
 
-        #region commands
+        #region Commands
 
         public ICommand OpenCommand { get { return new RelayCommand(CanOpen, Open); } }
         private void Open(object obj)
@@ -66,6 +69,10 @@ namespace SelfOrganizingMapWpfApp
             CurrentLabelList = new List<string>();
             LoadCSV(ref Path);
         }
+        private bool CanOpen(object obj)
+        {
+            return true;
+        }
 
         private void LoadCSV(ref string Path)
         {
@@ -73,9 +80,7 @@ namespace SelfOrganizingMapWpfApp
             openFileDialog1.InitialDirectory = Environment.CurrentDirectory;
             openFileDialog1.Filter = "All Files (*.csv)|*.csv";
             if (openFileDialog1.ShowDialog() == true)
-            {
                 Path = openFileDialog1.FileName;
-            }
             else
                 return;
 
@@ -101,7 +106,6 @@ namespace SelfOrganizingMapWpfApp
                 MessageBox.Show("CSV file is not correct, data should have this format: label, value, value,value and so on. Values should be grather than zero.");
             }
         }
-
         public void NormalizeData(List<double[]> d)
         {
             for (int i = 0; i < d[0].Length; i++)
@@ -120,10 +124,21 @@ namespace SelfOrganizingMapWpfApp
                     d[j][i] = d[j][i] / max;
             }
         }
-
-        private bool CanOpen(object obj)
+        private void BuildDataTable()
         {
-            return true;
+            CsvDataTable = new DataTable();
+            for (int i = 0; i < HowManyGroups; i++)
+                CsvDataTable.Columns.Add("group " + i.ToString());
+
+
+            for (int i = 0; i < CurrentLabelList.Count; i++)
+            {
+                int group = SOM.GetGroup((CurrentLabelList[i]));
+                double dist = SOM.GetDistance(CurrentDataList[i]);
+                Record [] row = new Record[HowManyGroups];
+                row[group] = new Record( CurrentLabelList[i] + " " + Math.Round(dist, 3).ToString(),dist);
+                CsvDataTable.Rows.Add(row);
+            }
         }
 
         public ICommand SortCommand { get { return new RelayCommand(CanSort, Sort); } }
@@ -145,24 +160,6 @@ namespace SelfOrganizingMapWpfApp
 
             RaisePropertyChangedEvent("CsvDataSet");
         }
-
-        private void BuildDataTable()
-        {
-            CsvDataTable = new DataTable();
-            for (int i = 0; i < HowManyGroups; i++)
-                CsvDataTable.Columns.Add("group " + i.ToString());
-
-
-            for (int i = 0; i < CurrentLabelList.Count; i++)
-            {
-                int group = SOM.GetGroup((CurrentLabelList[i]));
-                double dist = SOM.GetDistance(CurrentDataList[i]);
-                string[] row = new string[HowManyGroups];
-                row[group] = CurrentLabelList[i] + " " + Math.Round(dist, 3).ToString();
-                CsvDataTable.Rows.Add(row);
-            }
-        }
-
         private bool CanSort(object obj)
         {
             return CurrentDataList.Count > 0;
@@ -178,7 +175,34 @@ namespace SelfOrganizingMapWpfApp
                 handler(this, new PropertyChangedEventArgs(propertyName));
         }
     }
+    public class Record
+    {
+        public string  Label { get; set; }
+        public double  Opacity { get; set; }
+        public Record(string label, double opacity )
+        {
+            Label = label;
+            Opacity = opacity;
+        }
 
+        public override string ToString()
+        {
+            return Label.ToString();
+        }
+
+    }
+    public class ValueToOpacityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return  (value as TextBlock).Opacity;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+    }
     public class RelayCommand : ICommand
     {
         private Predicate<object> _canExecute;
