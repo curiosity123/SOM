@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace SelfOrganizingMapWpfApp
@@ -17,15 +18,14 @@ namespace SelfOrganizingMapWpfApp
     {
         AdachSOM SOM;
         DataTable CsvDataTable = new DataTable();
-        List<string> lab = new List<string>();
-        List<double[]> dat = new List<double[]>();
+        List<string> CurrentLabelList = new List<string>();
+        List<double[]> CurrentDataList = new List<double[]>();
 
 
         public SOMViewModel()
         {
-
-
         }
+
         #region Properties
 
         private int howManyGroups = 4;
@@ -34,7 +34,8 @@ namespace SelfOrganizingMapWpfApp
             get { return howManyGroups; }
             set
             {
-                howManyGroups = value;
+                if (value > 0 && value < 100)
+                    howManyGroups = value;
                 RaisePropertyChangedEvent("HowManyGroups");
             }
         }
@@ -61,9 +62,13 @@ namespace SelfOrganizingMapWpfApp
         {
             string Path = "";
 
-            dat = new List<double[]>();
-            lab = new List<string>();
+            CurrentDataList = new List<double[]>();
+            CurrentLabelList = new List<string>();
+            LoadCSV(ref Path);
+        }
 
+        private void LoadCSV(ref string Path)
+        {
             OpenFileDialog openFileDialog1 = new OpenFileDialog();
             openFileDialog1.InitialDirectory = Environment.CurrentDirectory;
             openFileDialog1.Filter = "All Files (*.csv)|*.csv";
@@ -74,32 +79,31 @@ namespace SelfOrganizingMapWpfApp
             else
                 return;
 
-
-
-            string CSVFilePathName = Path;
-            string[] Lines = File.ReadAllLines(CSVFilePathName);
-
-            for (int i = 1; i < Lines.Length; i++)
+            try
             {
-                string[] items = Lines[i].Split(',');
+                string CSVFilePathName = Path;
+                string[] Lines = File.ReadAllLines(CSVFilePathName);
 
-                lab.Add(items[0]);
+                for (int i = 1; i < Lines.Length; i++)
+                {
+                    string[] items = Lines[i].Split(',');
 
-                double[] temp = new double[items.Length - 1];
-                for (int j = 1; j < items.Length; j++)
-                    temp[j - 1] = double.Parse(items[j].Replace('.', ','));
-                dat.Add(temp);
+                    CurrentLabelList.Add(items[0]);
+
+                    double[] temp = new double[items.Length - 1];
+                    for (int j = 1; j < items.Length; j++)
+                        temp[j - 1] = double.Parse(items[j].Replace('.', ','));
+                    CurrentDataList.Add(temp);
+                }
             }
-
-
-
-
-
-
+            catch
+            {
+                MessageBox.Show("CSV file is not correct, data should have this format: label, value, value,value and so on. Values should be grather than zero.");
+            }
         }
-        public void Normalize(List<double[]> d)
+
+        public void NormalizeData(List<double[]> d)
         {
-           // double min = 1, max = 1;
             for (int i = 0; i < d[0].Length; i++)
             {
                 double min = 1, max = 1;
@@ -114,12 +118,7 @@ namespace SelfOrganizingMapWpfApp
 
                 for (int j = 0; j < d.Count; j++)
                     d[j][i] = d[j][i] / max;
-
-
             }
-            //for (int i = 0; i < d[0].Length; i++)
-            //    for (int j = 0; j < d.Count; j++)
-            //        d[j][i] = d[j][i] / max;
         }
 
         private bool CanOpen(object obj)
@@ -132,40 +131,44 @@ namespace SelfOrganizingMapWpfApp
         {
             Random r = new Random();
             SOM = new AdachSOM(HowManyGroups, null);
-            Normalize(dat);
 
-            for (int i = 0; i < lab.Count; i++)
-                SOM.Add(lab[i], dat[i]);
+
+            NormalizeData(CurrentDataList);
+
+            for (int i = 0; i < CurrentLabelList.Count; i++)
+                SOM.Add(CurrentLabelList[i], CurrentDataList[i]);
 
             SOM.StartFitting(10);
             Thread.Sleep(4000);
 
+            BuildDataTable();
 
+            RaisePropertyChangedEvent("CsvDataSet");
+        }
+
+        private void BuildDataTable()
+        {
             CsvDataTable = new DataTable();
             for (int i = 0; i < HowManyGroups; i++)
                 CsvDataTable.Columns.Add("group " + i.ToString());
 
 
-            for (int i = 0; i < lab.Count; i++)
+            for (int i = 0; i < CurrentLabelList.Count; i++)
             {
-                int group = SOM.GetGroup((lab[i]));
-                double dist = SOM.GetDistance(dat[i]);
-                string[] row = new string[HowManyGroups] ;
-                row[group] = lab[i] + " " +  Math.Round( dist,3).ToString() ;
+                int group = SOM.GetGroup((CurrentLabelList[i]));
+                double dist = SOM.GetDistance(CurrentDataList[i]);
+                string[] row = new string[HowManyGroups];
+                row[group] = CurrentLabelList[i] + " " + Math.Round(dist, 3).ToString();
                 CsvDataTable.Rows.Add(row);
             }
-
-
-            RaisePropertyChangedEvent("CsvDataSet");
         }
+
         private bool CanSort(object obj)
         {
-            return true;
+            return CurrentDataList.Count > 0;
         }
         #endregion
-      
-
-
+        
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void RaisePropertyChangedEvent(string propertyName)
@@ -175,8 +178,6 @@ namespace SelfOrganizingMapWpfApp
                 handler(this, new PropertyChangedEventArgs(propertyName));
         }
     }
-
-
 
     public class RelayCommand : ICommand
     {

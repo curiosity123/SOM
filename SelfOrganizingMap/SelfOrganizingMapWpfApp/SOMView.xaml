@@ -30,11 +30,11 @@
             </Grid.ColumnDefinitions>
             <Button Command="{Binding OpenCommand}">Open CSV</Button>
             <StackPanel  Grid.Column="2" Orientation="Horizontal">
-                <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="10" >Groups</TextBlock>
+                <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0" FontSize="10" TextWrapping="Wrap" Width="100">How many groups do you want to extract:</TextBlock>
                 <TextBox Text="{Binding HowManyGroups}" HorizontalAlignment="Stretch" Width="50"  VerticalAlignment="Stretch" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"></TextBox>
             </StackPanel>            
             <Button Grid.Column="5" Command="{Binding SortCommand}">Sort</Button>
         </Grid>
-        <DataGrid Grid.Row="3" x:Name="grid" ItemsSource="{Binding CsvDataSet}"  HorizontalAlignment="Stretch" ColumnWidth="*" CanUserReorderColumns="False" CanUserSortColumns="False"  CanUserAddRows="False" IsReadOnly="false"></DataGrid>
+        <DataGrid Grid.Row="3" x:Name="grid" ItemsSource="{Binding CsvDataSet}"  HorizontalAlignment="Stretch" ColumnWidth="*" CanUserReorderColumns="False" CanUserSortColumns="True"  CanUserAddRows="False" IsReadOnly="false"></DataGrid>
     </Grid>
 </Window>
