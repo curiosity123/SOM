@@ -121,7 +121,7 @@ namespace SelfOrganizingMapWpfApp
                 }
 
                 for (int j = 0; j < d.Count; j++)
-                    d[j][i] = d[j][i] / max;
+                    d[j][i] = (d[j][i] - min) / (max-min);   //alternative algorithm d[j][i] / max;
             }
         }
         private void BuildDataTable()
