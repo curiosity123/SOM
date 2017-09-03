@@ -106,39 +106,22 @@ namespace SelfOrganizingMapWpfApp
                 MessageBox.Show("CSV file is not correct, data should have this format: label, value, value,value and so on. Values should be grather than zero.");
             }
         }
-        public void NormalizeData(List<double[]> d)
-        {
-            for (int i = 0; i < d[0].Length; i++)
-            {
-                double min = 1, max = 1;
-                for (int j = 0; j < d.Count; j++)
-                {
-                    if (d[j][i] > max)
-                        max = d[j][i];
-
-                    if (d[j][i] < min)
-                        min = d[j][i];
-                }
-
-                for (int j = 0; j < d.Count; j++)
-                    d[j][i] = (d[j][i] - min) / (max-min);   //alternative algorithm d[j][i] / max;
-            }
-        }
         private void BuildDataTable()
         {
             CsvDataTable = new DataTable();
-            for (int i = 0; i < HowManyGroups; i++)
-                CsvDataTable.Columns.Add("group " + i.ToString());
-
+            CsvDataTable.Columns.Add("Label");
+            CsvDataTable.Columns.Add("Distance");
+            CsvDataTable.Columns.Add("Group");
 
             for (int i = 0; i < CurrentLabelList.Count; i++)
             {
                 int group = SOM.GetGroup((CurrentLabelList[i]));
                 double dist = SOM.GetDistance(CurrentDataList[i]);
-                Record [] row = new Record[HowManyGroups];
-                row[group] = new Record( CurrentLabelList[i] + " " + Math.Round(dist, 3).ToString(),dist);
+
+                object[] row = new object[3] { CurrentLabelList[i] + " " + Math.Round(dist, 3).ToString(), dist, group.ToString() };
                 CsvDataTable.Rows.Add(row);
             }
+            CsvDataTable.DefaultView.Sort="Group";
         }
 
         public ICommand SortCommand { get { return new RelayCommand(CanSort, Sort); } }
@@ -148,7 +131,7 @@ namespace SelfOrganizingMapWpfApp
             SOM = new AdachSOM(HowManyGroups, null);
 
 
-            NormalizeData(CurrentDataList);
+            AdachSOM.NormalizeData(CurrentDataList);
 
             for (int i = 0; i < CurrentLabelList.Count; i++)
                 SOM.Add(CurrentLabelList[i], CurrentDataList[i]);
@@ -165,7 +148,7 @@ namespace SelfOrganizingMapWpfApp
             return CurrentDataList.Count > 0;
         }
         #endregion
-        
+
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void RaisePropertyChangedEvent(string propertyName)
@@ -177,9 +160,9 @@ namespace SelfOrganizingMapWpfApp
     }
     public class Record
     {
-        public string  Label { get; set; }
-        public double  Opacity { get; set; }
-        public Record(string label, double opacity )
+        public string Label { get; set; }
+        public double Opacity { get; set; }
+        public Record(string label, double opacity)
         {
             Label = label;
             Opacity = opacity;
@@ -195,7 +178,7 @@ namespace SelfOrganizingMapWpfApp
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            return  (value as TextBlock).Opacity;
+            return (value as TextBlock).Opacity;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

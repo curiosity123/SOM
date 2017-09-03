@@ -66,6 +66,24 @@ namespace SelfOrganizingMap
         double[] DistanceMatrix;
         int howManyGroups = 0;
 
+        public static void NormalizeData(List<double[]> d)
+        {
+            for (int i = 0; i < d[0].Length; i++)
+            {
+                double min = 1, max = 1;
+                for (int j = 0; j < d.Count; j++)
+                {
+                    if (d[j][i] > max)
+                        max = d[j][i];
+
+                    if (d[j][i] < min)
+                        min = d[j][i];
+                }
+
+                for (int j = 0; j < d.Count; j++)
+                    d[j][i] = (d[j][i] - min) / (max - min);   //alternative algorithm d[j][i] / max;
+            }
+        }
 
         public void Add(string _label, double[] _data)
         {
