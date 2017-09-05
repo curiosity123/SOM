@@ -2,6 +2,7 @@
 using SelfOrganizingMap;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
 using System.IO;
@@ -56,6 +57,20 @@ namespace SelfOrganizingMapWpfApp
             }
         }
 
+
+        private ObservableCollection<Record> recordList;
+
+        public ObservableCollection<Record> RecordList
+        {
+            get { return recordList; }
+            set {
+
+                recordList = value;
+                RaisePropertyChangedEvent("RecordList");
+            }
+        }
+
+
         #endregion
 
         #region Commands
@@ -108,6 +123,7 @@ namespace SelfOrganizingMapWpfApp
         }
         private void BuildDataTable()
         {
+            RecordList = new ObservableCollection<SelfOrganizingMapWpfApp.Record>();
             CsvDataTable = new DataTable();
             CsvDataTable.Columns.Add("Label");
             CsvDataTable.Columns.Add("Distance");
@@ -120,6 +136,7 @@ namespace SelfOrganizingMapWpfApp
 
                 object[] row = new object[3] { CurrentLabelList[i] + " " + Math.Round(dist, 3).ToString(), dist, group.ToString() };
                 CsvDataTable.Rows.Add(row);
+                RecordList.Add(new Record(CurrentLabelList[i],dist, group, 0.5));
             }
             CsvDataTable.DefaultView.Sort="Group";
         }
@@ -161,10 +178,14 @@ namespace SelfOrganizingMapWpfApp
     public class Record
     {
         public string Label { get; set; }
+        public double Distance { get; set; }
+        public int Group { get; set; }
         public double Opacity { get; set; }
-        public Record(string label, double opacity)
+        public Record(string label,double distance, int group, double opacity)
         {
             Label = label;
+            Distance = distance;
+            Group = group;
             Opacity = opacity;
         }
 

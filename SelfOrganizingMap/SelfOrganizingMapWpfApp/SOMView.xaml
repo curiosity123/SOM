@@ -37,7 +37,28 @@
         </Grid>
         <!--<DataGrid Grid.Row="3" x:Name="grid"  ItemsSource="{Binding CsvDataSet}"   HorizontalAlignment="Stretch" ColumnWidth="*" CanUserReorderColumns="False" CanUserSortColumns="True"  CanUserAddRows="False" IsReadOnly="false">
         </DataGrid>-->
-        <DataGrid Grid.Row="3" x:Name="grid"  ItemsSource="{Binding CsvDataSet}"   HorizontalAlignment="Stretch" ColumnWidth="*" CanUserReorderColumns="False" CanUserSortColumns="True"  CanUserAddRows="False" IsReadOnly="false">
-        </DataGrid>
+
+        <ListView Grid.Row="3" ItemsSource="{Binding RecordList}"   HorizontalAlignment="Stretch" >
+            <ListView.Resources>
+                <Style TargetType="{x:Type GridViewColumnHeader}">
+                    <Setter Property="HorizontalContentAlignment" Value="Left" />
+                </Style>
+            </ListView.Resources>
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Label"   DisplayMemberBinding="{Binding Label}" />
+                    <GridViewColumn Header="Distance" Width="auto" DisplayMemberBinding="{Binding Distance}" />
+                    <GridViewColumn Header="Group" Width="auto" DisplayMemberBinding="{Binding Group}" />
+                </GridView>
+            </ListView.View>
+
+            <!--<ListView.ItemTemplate>
+                <DataTemplate>
+                    <Border Background="Red">
+                        <TextBlock Text="{Binding Label}"></TextBlock>
+                    </Border>
+                </DataTemplate>
+            </ListView.ItemTemplate>-->
+        </ListView>
     </Grid>
 </Window>
