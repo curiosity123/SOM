@@ -53,9 +53,9 @@
 
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Header="Label"   DisplayMemberBinding="{Binding Label}"/>
-                    <GridViewColumn Header="Distance" Width="auto" DisplayMemberBinding="{Binding Distance}" />
-                    <GridViewColumn Header="Group" Width="auto" DisplayMemberBinding="{Binding Group}"  />
+                    <GridViewColumn Header="Label" Width="150"  DisplayMemberBinding="{Binding Label}"/>
+                    <GridViewColumn Header="Distance" Width="150"  DisplayMemberBinding="{Binding Distance}" />
+                    <GridViewColumn Header="Group" Width="150"  DisplayMemberBinding="{Binding Group}"  />
                 </GridView>
             </ListView.View>
 
