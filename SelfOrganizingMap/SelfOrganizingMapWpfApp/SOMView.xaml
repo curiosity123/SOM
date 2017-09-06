@@ -47,7 +47,7 @@
                     <Setter Property="Foreground" Value="{Binding Color}"></Setter>
                     <Setter Property="FontWeight" Value="Black"></Setter>
                     <Setter Property="Opacity" Value="{Binding  LabelOpacity}" />
-                    <Setter Property="Background" Value="WhiteSmoke" ></Setter>
+                    <Setter Property="Background" Value="Black" ></Setter>
                 </Style>
             </ListView.Resources>
 
