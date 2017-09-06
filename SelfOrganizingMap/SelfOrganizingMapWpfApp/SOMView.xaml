@@ -33,7 +33,7 @@
                 <TextBlock HorizontalAlignment="Stretch" Foreground="#f0f3f4" VerticalAlignment="Stretch" Margin="0" FontSize="10" TextWrapping="Wrap" Width="100">How many groups do you want to extract:</TextBlock>
                 <TextBox Text="{Binding HowManyGroups}" Background="#566573" Foreground="#f0f3f4" HorizontalAlignment="Stretch" Width="50"  VerticalAlignment="Stretch" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"></TextBox>
             </StackPanel>
-            <Button Grid.Column="5" Command="{Binding SortCommand}">Sort</Button>
+            <Button Grid.Column="5"  Command="{Binding SortCommand}">Sort</Button>
         </Grid>
 
 

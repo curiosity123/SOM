@@ -44,6 +44,7 @@ namespace SelfOrganizingMapWpfApp
             }
         }
 
+
         public DataTable CsvDataSet
         {
             get
@@ -158,6 +159,7 @@ namespace SelfOrganizingMapWpfApp
         public ICommand SortCommand { get { return new RelayCommand(CanSort, Sort); } }
         private void Sort(object obj)
         {
+
             Random r = new Random();
             SOM = new AdachSOM(HowManyGroups, null);
 
@@ -168,7 +170,7 @@ namespace SelfOrganizingMapWpfApp
                 SOM.Add(CurrentLabelList[i], CurrentDataList[i]);
 
             SOM.StartFitting(10);
-            Thread.Sleep(4000);
+            Thread.Sleep(8000);
 
             BuildDataTable();
 
