@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SelfOrganizingMapWpfApp"
         mc:Ignorable="d"
-        Title="AdachSOM" Height="350" Width="525">
+        Title="AdachSOM" Height="350" Width="525" Background="#566573">
 
     <Window.DataContext >
         <local:SOMViewModel x:Name="context"/>
@@ -20,7 +20,7 @@
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="1" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition Width="20"></ColumnDefinition>
@@ -28,26 +28,25 @@
                 <ColumnDefinition Width="20"></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <Button Command="{Binding OpenCommand}">Open CSV</Button>
+            <Button Command="{Binding OpenCommand}" >Open CSV</Button>
             <StackPanel  Grid.Column="2" Orientation="Horizontal">
-                <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="0" FontSize="10" TextWrapping="Wrap" Width="100">How many groups do you want to extract:</TextBlock>
-                <TextBox Text="{Binding HowManyGroups}" HorizontalAlignment="Stretch" Width="50"  VerticalAlignment="Stretch" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"></TextBox>
+                <TextBlock HorizontalAlignment="Stretch" Foreground="#f0f3f4" VerticalAlignment="Stretch" Margin="0" FontSize="10" TextWrapping="Wrap" Width="100">How many groups do you want to extract:</TextBlock>
+                <TextBox Text="{Binding HowManyGroups}" Background="#566573" Foreground="#f0f3f4" HorizontalAlignment="Stretch" Width="50"  VerticalAlignment="Stretch" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"></TextBox>
             </StackPanel>
             <Button Grid.Column="5" Command="{Binding SortCommand}">Sort</Button>
         </Grid>
-        <!--<DataGrid Grid.Row="3" x:Name="grid"  ItemsSource="{Binding CsvDataSet}"   HorizontalAlignment="Stretch" ColumnWidth="*" CanUserReorderColumns="False" CanUserSortColumns="True"  CanUserAddRows="False" IsReadOnly="false">
-        </DataGrid>-->
 
-        <ListView Grid.Row="3" ItemsSource="{Binding RecordList}"   HorizontalAlignment="Stretch" >
+
+        <ListView Grid.Row="3" ItemsSource="{Binding RecordList}" Background="#f0f3f4"  HorizontalAlignment="Stretch" >
             <ListView.Resources>
                 <Style TargetType="{x:Type GridViewColumnHeader}">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch"  />
                 </Style>
                 <Style TargetType="{x:Type ListViewItem}">
-                    <Setter Property="Foreground" Value="{Binding Color}"></Setter>
+                    <Setter Property="Foreground" Value="Black"></Setter>
                     <Setter Property="FontWeight" Value="Black"></Setter>
                     <Setter Property="Opacity" Value="{Binding  LabelOpacity}" />
-                    <Setter Property="Background" Value="Black" ></Setter>
+                    <Setter Property="Background" Value="{Binding Color}" ></Setter>
                 </Style>
             </ListView.Resources>
 

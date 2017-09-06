@@ -124,6 +124,7 @@ namespace SelfOrganizingMapWpfApp
         }
         private void BuildDataTable()
         {
+            List<int> uniqueGroups = new List<int>();
             RecordList = new ObservableCollection<SelfOrganizingMapWpfApp.Record>();
             CsvDataTable = new DataTable();
             CsvDataTable.Columns.Add("Label");
@@ -137,10 +138,15 @@ namespace SelfOrganizingMapWpfApp
 
                 object[] row = new object[3] { CurrentLabelList[i] + " " + Math.Round(dist, 3).ToString(), dist, group.ToString() };
                 CsvDataTable.Rows.Add(row);
-
+                if (!uniqueGroups.Contains(group))
+                    uniqueGroups.Add(group);
                 RecordList.Add(new Record(CurrentLabelList[i], dist, group));
 
             }
+            var sortedUniqueGroups = from item in uniqueGroups orderby item select item;
+            uniqueGroups = new List<int>(sortedUniqueGroups);
+            foreach (Record r in RecordList)
+                r.SetColors(uniqueGroups);
 
             var sortedByGroup = from item in RecordList orderby item.Group select item;
             RecordList = new ObservableCollection<Record>(sortedByGroup.ToList());
@@ -196,88 +202,82 @@ namespace SelfOrganizingMapWpfApp
             Distance = distance;
             Group = group;
             LabelOpacity = 1 - Math.Sqrt(distance / 1.42);
-            Color = (SolidColorBrush)(new BrushConverter().ConvertFrom(ColourValues[group]));
 
+
+
+        }
+        public void SetColors(List<int> uniqueGroups)
+        {
+            Color = (SolidColorBrush)(new BrushConverter().ConvertFrom(ColourValues[uniqueGroups.IndexOf(Group)]));
         }
 
         public override string ToString()
         {
             return Label.ToString();
         }
+
         static string[] ColourValues = new string[] {
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B",
-              "#FFAD3E", "#E85554","#B469FF","#54A5E8","#5CFF9B"
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
+              "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e"
     };
     }
 
