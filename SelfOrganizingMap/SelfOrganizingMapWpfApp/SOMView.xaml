@@ -16,6 +16,8 @@
         <Grid.RowDefinitions>
             <RowDefinition Height=" 10"></RowDefinition>
             <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="10"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
             <RowDefinition Height=" 10"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
@@ -36,27 +38,36 @@
             <Button Grid.Column="5"  Command="{Binding SortCommand}">Sort</Button>
         </Grid>
 
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+          
+            <TextBlock Grid.ColumnSpan="1" Grid.Column="2" Foreground="#f0f3f4" Text="{Binding Results}" HorizontalAlignment="Right" VerticalAlignment="Center"></TextBlock>
+        </Grid>
 
-        <ListView Grid.Row="3" ItemsSource="{Binding RecordList}" Background="#f0f3f4"  HorizontalAlignment="Stretch" >
-            <ListView.Resources>
-                <Style TargetType="{x:Type GridViewColumnHeader}">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch"  />
-                </Style>
-                <Style TargetType="{x:Type ListViewItem}">
-                    <Setter Property="Foreground" Value="Black"></Setter>
-                    <Setter Property="FontWeight" Value="Black"></Setter>
-                    <Setter Property="Opacity" Value="{Binding  LabelOpacity}" />
-                    <Setter Property="Background" Value="{Binding Color}" ></Setter>
-                </Style>
-            </ListView.Resources>
+        <ListView Grid.Row="5" ItemsSource="{Binding RecordList}" Background="#f0f3f4"  HorizontalAlignment="Stretch" >
+        <ListView.Resources>
+            <Style TargetType="{x:Type GridViewColumnHeader}">
+                <Setter Property="HorizontalContentAlignment" Value="Stretch"  />
+            </Style>
+            <Style TargetType="{x:Type ListViewItem}">
+                <Setter Property="Foreground" Value="Black"></Setter>
+                <Setter Property="FontWeight" Value="Black"></Setter>
+                <Setter Property="Opacity" Value="{Binding  LabelOpacity}" />
+                <Setter Property="Background" Value="{Binding Color}" ></Setter>
+            </Style>
+        </ListView.Resources>
 
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn Header="Label" Width="150"  DisplayMemberBinding="{Binding Label}"/>
-                    <GridViewColumn Header="Distance" Width="150"  DisplayMemberBinding="{Binding Distance}" />
-                    <GridViewColumn Header="Group" Width="150"  DisplayMemberBinding="{Binding Group}"  />
-                </GridView>
-            </ListView.View>
+        <ListView.View>
+            <GridView>
+                <GridViewColumn Header="Label" Width="150"  DisplayMemberBinding="{Binding Label}"/>
+                <GridViewColumn Header="Distance" Width="150"  DisplayMemberBinding="{Binding Distance}" />
+                <GridViewColumn Header="Group" Width="150"  DisplayMemberBinding="{Binding Group}"  />
+            </GridView>
+        </ListView.View>
 
 
         </ListView>

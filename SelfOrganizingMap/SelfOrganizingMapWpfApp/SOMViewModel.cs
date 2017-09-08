@@ -38,40 +38,33 @@ namespace SelfOrganizingMapWpfApp
             get { return howManyGroups; }
             set
             {
-                if (value > 0 && value < 100)
+                if (value > 0 && value < 100000)
                     howManyGroups = value;
                 RaisePropertyChangedEvent("HowManyGroups");
             }
         }
 
-
-        public DataTable CsvDataSet
-        {
-            get
-            {
-                return CsvDataTable;
-            }
-            set
-            {
-                CsvDataTable = value;
-                RaisePropertyChangedEvent("CsvDataSet");
-            }
-        }
-
-
         private ObservableCollection<Record> recordList;
-
         public ObservableCollection<Record> RecordList
         {
             get { return recordList; }
             set
             {
-
                 recordList = value;
                 RaisePropertyChangedEvent("RecordList");
             }
         }
 
+        private string results;
+        public string Results
+        {
+            get { return results; }
+            set
+            {
+                results = value;
+                RaisePropertyChangedEvent("Results");
+            }
+        }
 
         #endregion
 
@@ -163,15 +156,14 @@ namespace SelfOrganizingMapWpfApp
             Random r = new Random();
             SOM = new AdachSOM(HowManyGroups, null);
 
-
             AdachSOM.NormalizeData(CurrentDataList);
 
             for (int i = 0; i < CurrentLabelList.Count; i++)
                 SOM.Add(CurrentLabelList[i], CurrentDataList[i]);
 
             SOM.StartFitting(10);
-            Thread.Sleep(8000);
-
+            Thread.Sleep(4000);
+            SOM.StopFitting();
             BuildDataTable();
 
             RaisePropertyChangedEvent("CsvDataSet");
