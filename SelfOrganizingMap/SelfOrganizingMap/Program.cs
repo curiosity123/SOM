@@ -25,7 +25,7 @@ namespace SelfOrganizingMap
                 som.Add(lab.Last(), dat.Last());
             }
 
-            som.StartFitting(12);
+            som.StartFitting();
             //Thread.Sleep(500);
          //   som.StopFitting();
             Thread.Sleep(1000);
@@ -167,7 +167,7 @@ namespace SelfOrganizingMap
             return distance;
         }
 
-        public void StartFitting(int AutoStopPrecision = 14)
+        public void StartFitting()
         {
             if (isStarted == false)
             {
@@ -179,13 +179,8 @@ namespace SelfOrganizingMap
                     while (isStarted)
                     {
                         double tempResult = FitNetworkWinner(Datas, Neurons, DistanceMatrix);
-
-                        if (AutoStopPrecision != 14 && Math.Round(tempResult, AutoStopPrecision) == Math.Round(result, AutoStopPrecision))
-                            isStarted = false;
-
                         result = tempResult;
-
-                        DiagnosticInfo("Total distance: " + Math.Round(result, AutoStopPrecision) + "\n");
+                        DiagnosticInfo("Total distance: " + Math.Round(result,10) + "\n");
                     }
                 }).Start();
             }

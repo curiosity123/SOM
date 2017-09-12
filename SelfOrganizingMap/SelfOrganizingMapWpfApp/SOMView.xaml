@@ -35,7 +35,7 @@
                 <TextBlock HorizontalAlignment="Stretch" Foreground="#f0f3f4" VerticalAlignment="Stretch" Margin="0" FontSize="10" TextWrapping="Wrap" Width="100">How many groups do you want to extract:</TextBlock>
                 <TextBox Text="{Binding HowManyGroups}" Background="#566573" Foreground="#f0f3f4" HorizontalAlignment="Stretch" Width="50"  VerticalAlignment="Stretch" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"></TextBox>
             </StackPanel>
-            <Button Grid.Column="5"  Command="{Binding SortCommand}">Sort</Button>
+            <Button Grid.Column="5" Content="{Binding CalculateButtonLabel}"  Command="{Binding CalculateCommand}"></Button>
         </Grid>
 
         <Grid Grid.Row="3">
@@ -45,7 +45,7 @@
                 <ColumnDefinition></ColumnDefinition>
             </Grid.ColumnDefinitions>
           
-            <TextBlock Grid.ColumnSpan="1" Grid.Column="2" Foreground="#f0f3f4" Text="{Binding Results}" HorizontalAlignment="Right" VerticalAlignment="Center"></TextBlock>
+            <TextBlock Grid.ColumnSpan="1" Grid.Column="2" Margin="15,0,0,0" Foreground="#f0f3f4" Text="{Binding Results}" HorizontalAlignment="Left" VerticalAlignment="Center"></TextBlock>
         </Grid>
 
         <ListView Grid.Row="5" ItemsSource="{Binding RecordList}" Background="#f0f3f4"  HorizontalAlignment="Stretch" >

@@ -15,16 +15,17 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace SelfOrganizingMapWpfApp
 {
     public class SOMViewModel : INotifyPropertyChanged
     {
         AdachSOM SOM;
-        DataTable CsvDataTable = new DataTable();
-        List<string> CurrentLabelList = new List<string>();
-        List<double[]> CurrentDataList = new List<double[]>();
-
+        DataTable _csvDataTable = new DataTable();
+        List<string> _currentLabelList = new List<string>();
+        List<double[]> _currentDataList = new List<double[]>();
+        bool _start = false;
 
         public SOMViewModel()
         {
@@ -32,37 +33,48 @@ namespace SelfOrganizingMapWpfApp
 
         #region Properties
 
-        private int howManyGroups = 4;
+        private int _howManyGroups = 4;
         public int HowManyGroups
         {
-            get { return howManyGroups; }
+            get { return _howManyGroups; }
             set
             {
                 if (value > 0 && value < 100000)
-                    howManyGroups = value;
+                    _howManyGroups = value;
                 RaisePropertyChangedEvent("HowManyGroups");
             }
         }
 
-        private ObservableCollection<Record> recordList;
+        private ObservableCollection<Record> _recordList;
         public ObservableCollection<Record> RecordList
         {
-            get { return recordList; }
+            get { return _recordList; }
             set
             {
-                recordList = value;
+                _recordList = value;
                 RaisePropertyChangedEvent("RecordList");
             }
         }
 
-        private string results;
+        private string _results;
         public string Results
         {
-            get { return results; }
+            get { return _results; }
             set
             {
-                results = value;
+                _results = value;
                 RaisePropertyChangedEvent("Results");
+            }
+        }
+
+        private string _calculateButtonLabel = "Start";
+        public string CalculateButtonLabel
+        {
+            get { return _calculateButtonLabel; }
+            set
+            {
+                _calculateButtonLabel = value;
+                RaisePropertyChangedEvent("CalculateButtonLabel");
             }
         }
 
@@ -75,8 +87,8 @@ namespace SelfOrganizingMapWpfApp
         {
             string Path = "";
 
-            CurrentDataList = new List<double[]>();
-            CurrentLabelList = new List<string>();
+            _currentDataList = new List<double[]>();
+            _currentLabelList = new List<string>();
             LoadCSV(ref Path);
         }
         private bool CanOpen(object obj)
@@ -84,6 +96,57 @@ namespace SelfOrganizingMapWpfApp
             return true;
         }
 
+        public ICommand CalculateCommand { get { return new RelayCommand(CanCalculate, Calculate); } }
+        private void Calculate(object obj)
+        {
+            if (_start == false)
+            {
+                _start = true;
+                CalculateButtonLabel = "Processing (press to stop)";
+                RaisePropertyChangedEvent("CalculateButtonLabel");
+
+                SOM = new AdachSOM(HowManyGroups, ResultUpdater);
+                AdachSOM.NormalizeData(_currentDataList);
+                for (int i = 0; i < _currentLabelList.Count; i++)
+                    SOM.Add(_currentLabelList[i], _currentDataList[i]);
+                SOM.StartFitting();
+
+            }
+            else
+            {
+                CalculateButtonLabel = "Start";
+                RaisePropertyChangedEvent("CalculateButtonLabel");
+
+                _start = false;
+                SOM.StopFitting();
+
+                BuildDataTable();
+                RaisePropertyChangedEvent("CsvDataSet");
+            }
+
+        }
+        private bool CanCalculate(object obj)
+        {
+            return _currentDataList.Count > 0;
+        }
+
+        #endregion
+
+        private void ResultUpdater(string s)
+        {
+            try
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Results = s;
+                });
+            }
+
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+        }
         private void LoadCSV(ref string Path)
         {
             OpenFileDialog openFileDialog1 = new OpenFileDialog();
@@ -103,12 +166,12 @@ namespace SelfOrganizingMapWpfApp
                 {
                     string[] items = Lines[i].Split(',');
 
-                    CurrentLabelList.Add(items[0]);
+                    _currentLabelList.Add(items[0]);
 
                     double[] temp = new double[items.Length - 1];
                     for (int j = 1; j < items.Length; j++)
                         temp[j - 1] = double.Parse(items[j].Replace('.', ','));
-                    CurrentDataList.Add(temp);
+                    _currentDataList.Add(temp);
                 }
             }
             catch
@@ -120,22 +183,21 @@ namespace SelfOrganizingMapWpfApp
         {
             List<int> uniqueGroups = new List<int>();
             RecordList = new ObservableCollection<SelfOrganizingMapWpfApp.Record>();
-            CsvDataTable = new DataTable();
-            CsvDataTable.Columns.Add("Label");
-            CsvDataTable.Columns.Add("Distance");
-            CsvDataTable.Columns.Add("Group");
+            _csvDataTable = new DataTable();
+            _csvDataTable.Columns.Add("Label");
+            _csvDataTable.Columns.Add("Distance");
+            _csvDataTable.Columns.Add("Group");
 
-            for (int i = 0; i < CurrentLabelList.Count; i++)
+            for (int i = 0; i < _currentLabelList.Count; i++)
             {
-                int group = SOM.GetGroup((CurrentLabelList[i]));
-                double dist = SOM.GetDistance(CurrentDataList[i]);
+                int group = SOM.GetGroup((_currentLabelList[i]));
+                double dist = SOM.GetDistance(_currentDataList[i]);
 
-                object[] row = new object[3] { CurrentLabelList[i] + " " + Math.Round(dist, 3).ToString(), dist, group.ToString() };
-                CsvDataTable.Rows.Add(row);
+                object[] row = new object[3] { _currentLabelList[i] + " " + Math.Round(dist, 3).ToString(), dist, group.ToString() };
+                _csvDataTable.Rows.Add(row);
                 if (!uniqueGroups.Contains(group))
                     uniqueGroups.Add(group);
-                RecordList.Add(new Record(CurrentLabelList[i], dist, group));
-
+                RecordList.Add(new Record(_currentLabelList[i], dist, group));
             }
             var sortedUniqueGroups = from item in uniqueGroups orderby item select item;
             uniqueGroups = new List<int>(sortedUniqueGroups);
@@ -145,35 +207,8 @@ namespace SelfOrganizingMapWpfApp
             var sortedByGroup = from item in RecordList orderby item.Group select item;
             RecordList = new ObservableCollection<Record>(sortedByGroup.ToList());
 
-            CsvDataTable.DefaultView.Sort = "Group";
+            _csvDataTable.DefaultView.Sort = "Group";
         }
-
-
-        public ICommand SortCommand { get { return new RelayCommand(CanSort, Sort); } }
-        private void Sort(object obj)
-        {
-
-            Random r = new Random();
-            SOM = new AdachSOM(HowManyGroups, null);
-
-            AdachSOM.NormalizeData(CurrentDataList);
-
-            for (int i = 0; i < CurrentLabelList.Count; i++)
-                SOM.Add(CurrentLabelList[i], CurrentDataList[i]);
-
-            SOM.StartFitting(10);
-            Thread.Sleep(4000);
-            SOM.StopFitting();
-            BuildDataTable();
-
-            RaisePropertyChangedEvent("CsvDataSet");
-        }
-        private bool CanSort(object obj)
-        {
-            return CurrentDataList.Count > 0;
-        }
-        #endregion
-
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void RaisePropertyChangedEvent(string propertyName)
@@ -273,19 +308,6 @@ namespace SelfOrganizingMapWpfApp
               "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e",
               "#ec7063", "#a569bd","#5499c7","#48c9b0","#f4d03f","#85929e"
     };
-    }
-
-    public class ValueToOpacityConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            return (value as TextBlock).Opacity;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            throw new NotSupportedException();
-        }
     }
     public class RelayCommand : ICommand
     {
