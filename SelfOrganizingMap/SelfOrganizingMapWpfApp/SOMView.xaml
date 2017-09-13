@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SelfOrganizingMapWpfApp"
         mc:Ignorable="d"
-        Title="AdachSOM" Height="350" Width="525" Background="#566573">
+        Title="AdachSOM - Clustering algorithm" Height="350" Width="525" Background="#566573">
 
     <Window.DataContext >
         <local:SOMViewModel x:Name="context"/>
@@ -32,7 +32,7 @@
             </Grid.ColumnDefinitions>
             <Button Command="{Binding OpenCommand}" >Open CSV</Button>
             <StackPanel  Grid.Column="2" Orientation="Horizontal">
-                <TextBlock HorizontalAlignment="Stretch" Foreground="#f0f3f4" VerticalAlignment="Stretch" Margin="0" FontSize="10" TextWrapping="Wrap" Width="100">How many groups do you want to extract:</TextBlock>
+                <TextBlock HorizontalAlignment="Stretch" Foreground="#f0f3f4" VerticalAlignment="Stretch" Margin="0" FontSize="10" TextWrapping="Wrap" Width="100">How many centroids do you want to use:</TextBlock>
                 <TextBox Text="{Binding HowManyGroups}" Background="#566573" Foreground="#f0f3f4" HorizontalAlignment="Stretch" Width="50"  VerticalAlignment="Stretch" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"></TextBox>
             </StackPanel>
             <Button Grid.Column="5" Content="{Binding CalculateButtonLabel}"  Command="{Binding CalculateCommand}"></Button>
@@ -65,7 +65,7 @@
             <GridView>
                 <GridViewColumn Header="Label" Width="150"  DisplayMemberBinding="{Binding Label}"/>
                 <GridViewColumn Header="Distance" Width="150"  DisplayMemberBinding="{Binding Distance}" />
-                <GridViewColumn Header="Group" Width="150"  DisplayMemberBinding="{Binding Group}"  />
+                <GridViewColumn Header="Centroid number" Width="150"  DisplayMemberBinding="{Binding Group}"  />
             </GridView>
         </ListView.View>
 

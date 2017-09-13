@@ -27,7 +27,7 @@ namespace SelfOrganizingMap
 
             som.StartFitting();
             //Thread.Sleep(500);
-         //   som.StopFitting();
+            //   som.StopFitting();
             Thread.Sleep(1000);
             Console.WriteLine("\n");
             for (int i = 0; i < lab.Count; i++)
@@ -180,7 +180,7 @@ namespace SelfOrganizingMap
                     {
                         double tempResult = FitNetworkWinner(Datas, Neurons, DistanceMatrix);
                         result = tempResult;
-                        DiagnosticInfo("Total distance: " + Math.Round(result,10) + "\n");
+                        DiagnosticInfo("Total distance: " + Math.Round(result, 10) + "\n");
                     }
                 }).Start();
             }
@@ -194,22 +194,22 @@ namespace SelfOrganizingMap
         private double FitNetworkWinner(List<double[]> Inputs, List<double[]> Neurons, double[] DistanceMatrix)
         {
             double totalDistance = 0;
-            List<int> AliveNeurons = new List<int>();
+
             for (int i = 0; i < Inputs.Count; i++)
             {
                 for (int j = 0; j < Neurons.Count; j++)
                     DistanceMatrix[j] = CalculateDistance(Inputs[i], Neurons[j]);
 
                 int winner = FindShortestDistance(DistanceMatrix);
-                AliveNeurons.Add(winner);
+
                 totalDistance += DistanceMatrix[winner];
-                FitNeuron(Inputs[i], Neurons[winner]);
+                for (int j = 0; j < Neurons.Count; j++)
+                    if (j == winner)
+                        FitNeuron(Inputs[i], Neurons[j]);
+                    
             }
 
-            for (int i = 0; i < Neurons.Count; i++)
-                if (!AliveNeurons.Contains(i))
-                    for (int j = 0; j < Neurons[i].Length; j++)
-                        Neurons[i][j] = 0;
+
 
             totalDistance /= Inputs.Count;
             return totalDistance;
@@ -235,11 +235,10 @@ namespace SelfOrganizingMap
                 Neurons[i] -= 0.01 * (Neurons[i] - Inputs[i]);
         }
 
-        private void FitNeuron(double[] Inputs, double[] Neurons, double distance, double winner)
+        private void FitNeuron(double[] Inputs, double[] Neurons, double distance)
         {
-            //   if (distance <0.5)
             for (int i = 0; i < Inputs.Length; i++)
-                Neurons[i] -= distance * (0.1 * (Neurons[i] - Inputs[i]));
+                Neurons[i] -= distance * (0.01 * (Neurons[i] - Inputs[i]));
         }
 
         private double CalculateDistance(double[] Input, double[] Neuron)

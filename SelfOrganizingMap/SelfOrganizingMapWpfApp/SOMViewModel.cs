@@ -67,7 +67,7 @@ namespace SelfOrganizingMapWpfApp
             }
         }
 
-        private string _calculateButtonLabel = "Start";
+        private string _calculateButtonLabel = "Extract";
         public string CalculateButtonLabel
         {
             get { return _calculateButtonLabel; }
@@ -102,7 +102,7 @@ namespace SelfOrganizingMapWpfApp
             if (_start == false)
             {
                 _start = true;
-                CalculateButtonLabel = "Processing (press to stop)";
+                CalculateButtonLabel = "Extracting...(press to stop)";
                 RaisePropertyChangedEvent("CalculateButtonLabel");
 
                 SOM = new AdachSOM(HowManyGroups, ResultUpdater);
@@ -114,7 +114,7 @@ namespace SelfOrganizingMapWpfApp
             }
             else
             {
-                CalculateButtonLabel = "Start";
+                CalculateButtonLabel = "Extract";
                 RaisePropertyChangedEvent("CalculateButtonLabel");
 
                 _start = false;
