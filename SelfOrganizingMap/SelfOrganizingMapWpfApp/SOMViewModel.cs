@@ -21,7 +21,7 @@ namespace SelfOrganizingMapWpfApp
 {
     public class SOMViewModel : INotifyPropertyChanged
     {
-        AdachSOM SOM;
+        AdachSOM _som;
         DataTable _csvDataTable = new DataTable();
         List<string> _currentLabelList = new List<string>();
         List<double[]> _currentDataList = new List<double[]>();
@@ -105,11 +105,11 @@ namespace SelfOrganizingMapWpfApp
                 CalculateButtonLabel = "Extracting...(press to stop)";
                 RaisePropertyChangedEvent("CalculateButtonLabel");
 
-                SOM = new AdachSOM(HowManyGroups, ResultUpdater);
+                _som = new AdachSOM(HowManyGroups, ResultUpdater);
                 AdachSOM.NormalizeData(_currentDataList);
                 for (int i = 0; i < _currentLabelList.Count; i++)
-                    SOM.Add(_currentLabelList[i], _currentDataList[i]);
-                SOM.StartFitting();
+                    _som.Add(_currentLabelList[i], _currentDataList[i]);
+                _som.StartFitting();
 
             }
             else
@@ -118,7 +118,7 @@ namespace SelfOrganizingMapWpfApp
                 RaisePropertyChangedEvent("CalculateButtonLabel");
 
                 _start = false;
-                SOM.StopFitting();
+                _som.StopFitting();
 
                 BuildDataTable();
                 RaisePropertyChangedEvent("CsvDataSet");
@@ -190,8 +190,8 @@ namespace SelfOrganizingMapWpfApp
 
             for (int i = 0; i < _currentLabelList.Count; i++)
             {
-                int group = SOM.GetGroup((_currentLabelList[i]));
-                double dist = SOM.GetDistance(_currentDataList[i]);
+                int group = _som.GetGroup((_currentLabelList[i]));
+                double dist = _som.GetDistance(_currentDataList[i]);
 
                 object[] row = new object[3] { _currentLabelList[i] + " " + Math.Round(dist, 3).ToString(), dist, group.ToString() };
                 _csvDataTable.Rows.Add(row);
